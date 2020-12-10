@@ -16,10 +16,8 @@ resource "null_resource" "tags_as_list_of_maps" {
   }
 }
 
-data "template_file" "cloud_config_amazon" {
-  template = file("${path.module}/amazon_ecs_ami.yml")
-
-  vars = {
+locals {
+  cloud_config_amazon = templatefile("${path.module}/amazon_ecs_ami.yml", {
     region                 = data.aws_region._.name
     name                   = local.name
     block_metadata_service = lookup(var.cluster_properties, "block_metadata_service", "0")
@@ -27,7 +25,7 @@ data "template_file" "cloud_config_amazon" {
     efs_id                 = lookup(var.cluster_properties, "efs_id", "")
     efs_mount_folder       = lookup(var.cluster_properties, "efs_mount_folder", "/mnt/efs")
     custom_userdata        = lookup(var.cluster_properties, "ec2_custom_userdata", "")
-  }
+  })
 }
 
 resource "aws_launch_template" "launch_template" {
@@ -39,7 +37,7 @@ resource "aws_launch_template" "launch_template" {
   instance_type          = var.cluster_properties["ec2_instance_type"]
   key_name               = var.cluster_properties["ec2_key_name"]
   vpc_security_group_ids = var.vpc_security_group_ids
-  user_data              = base64encode(data.template_file.cloud_config_amazon.rendered)
+  user_data              = base64encode(local.cloud_config_amazon)
 
   iam_instance_profile {
     arn = var.iam_instance_profile
