@@ -50,16 +50,6 @@ resource "aws_launch_template" "launch_template" {
   }
 
   block_device_mappings {
-    device_name = "/dev/xvda"
-
-    ebs {
-      volume_size           = "15"
-      volume_type           = "gp2"
-      delete_on_termination = true
-    }
-  }
-
-  block_device_mappings {
     device_name = "/dev/xvdcz"
 
     ebs {
@@ -68,6 +58,16 @@ resource "aws_launch_template" "launch_template" {
       delete_on_termination = true
       encrypted             = lookup(var.cluster_properties, "ec2_disk_encryption", "true")
     }
+  }
+
+  tag_specifications {
+    resource_type = "volume"
+    tags          = "${var.tags}"
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags          = "${var.tags}"
   }
 
   lifecycle {
