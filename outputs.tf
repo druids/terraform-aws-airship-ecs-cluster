@@ -23,3 +23,7 @@ output "asg_name" {
   value       = module.autoscalinggroup.asg_name
 }
 
+output "lt_name" {
+  description = "lt_name exports the name of the launch template if one is created"
+  value       = "${module.autoscalinggroup.lt_name}"
+}
